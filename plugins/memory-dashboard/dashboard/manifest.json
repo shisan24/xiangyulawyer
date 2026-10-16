@@ -1,0 +1,4 @@
+{
+  "name": "memory-dashboard",
+  "api": "plugin_api.py"
+}

@@ -1,0 +1,9 @@
+{
+  "window_pct": 90.0,
+  "low_balance": { "USD": 1.0, "CNY": 5.0 },
+  "days_left": 3.0,
+  "fx_to_usd": { "CNY": 0.1408, "USD": 1.0 },
+  "cooldown_hours": 12.0,
+  "health_alert_max_age_hours": 48.0,
+  "mute": []
+}

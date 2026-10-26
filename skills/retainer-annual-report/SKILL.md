@@ -1,6 +1,6 @@
 ---
 name: retainer-annual-report
-description: 编制常法客户年度服务报告、服务总结或工作汇编，梳理服务期工作。底稿→模板→出稿。
+description: 编制常法客户年度服务报告（主办）、服务总结或工作汇编：定服务期、上期报告版式、全库汇编、出稿。
 version: 1.0.0
 author: xiangyulawyer
 source: https://github.com/shisan24/xiangyulawyer
@@ -10,10 +10,7 @@ source: https://github.com/shisan24/xiangyulawyer
 
 # retainer-annual-report
 
-**适用场景**：编制常法客户年度服务报告、服务总结或工作汇编，梳理服务期工作。底稿→模板→出稿。
-
-## 一、认定服务期与出文主体
-- 集团处于换所过渡期时：只纳入本单位服务期内的条目；签约单位存疑时用确认表、发票核对后再定落款。
+**适用场景**：编制常法客户年度服务报告（主办）、服务总结或工作汇编：定服务期、上期报告版式、全库汇编、出稿。
 
 ## 三、全库工作汇编（核心步骤）
 - 排除：上期报告已覆盖的旧月份子树（按上期附表末条日期切界）、索引文件本身（清单xlsx、台账docx）、投标询价材料、发票证照、脚本截图。

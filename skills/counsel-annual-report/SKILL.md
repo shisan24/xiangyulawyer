@@ -1,6 +1,6 @@
 ---
 name: counsel-annual-report
-description: 常法年度报告编制与服务期工作梳理：上期报告作模板，汇编条目、主体归属、出稿。
+description: 常法服务期验收材料与主体归属校对：验收单字段、期间与金额核期、主体切分；年度报告编制走 retainer-annual-report。
 version: 1.0.0
 author: xiangyulawyer
 source: https://github.com/shisan24/xiangyulawyer
@@ -10,7 +10,7 @@ source: https://github.com/shisan24/xiangyulawyer
 
 # counsel-annual-report
 
-**适用场景**：常法年度报告编制与服务期工作梳理：上期报告作模板，汇编条目、主体归属、出稿。
+**适用场景**：常法服务期验收材料与主体归属校对：验收单字段、期间与金额核期、主体切分；年度报告编制走 retainer-annual-report。
 
 ## When to Use
 - 季度/年度成果清单、服务成果确认表等付款配套材料的编制与核对。

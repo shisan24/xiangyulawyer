@@ -1,6 +1,6 @@
 ---
 name: arbitration-preservation
-description: 仲裁程序中的财产保全办理——【地域】仲裁委材料清单/审查红线/上传流程。触发：仲裁保全、【主体】保全、仲裁委财产保全。
+description: 仲裁程序中的财产保全办理——当地仲裁委材料清单/审查红线/上传流程。触发：仲裁保全、客户单位保全、仲裁委财产保全。
 version: 1.0.0
 author: xiangyulawyer
 source: https://github.com/shisan24/xiangyulawyer
@@ -10,7 +10,7 @@ source: https://github.com/shisan24/xiangyulawyer
 
 # arbitration-preservation
 
-**适用场景**：仲裁程序中的财产保全办理——【地域】仲裁委材料清单/审查红线/上传流程。触发：仲裁保全、【主体】保全、仲裁委财产保全。
+**适用场景**：仲裁程序中的财产保全办理——当地仲裁委材料清单/审查红线/上传流程。触发：仲裁保全、客户单位保全、仲裁委财产保全。
 
 ## When to Use
 - 起草/修改仲裁保全申请书、保全必要性情况说明、向法院的委托手续
@@ -27,7 +27,7 @@ source: https://github.com/shisan24/xiangyulawyer
 ## 审查清单（逐项核）
 - [ ] 保全对象与财产线索主体一致（分公司签约 → 房产/账户登记主体核对）
 - [ ] 受理通知书已取得（目录核对）
-- [ ] 保单保函提交时机按法院规则（【地域】本地审核后交）
+- [ ] 保单保函提交时机按法院规则（当地审核后交）
 
 ## 关键坑
 - 扫描件盖章版 PDF 与 docx 源稿必须交叉核对（OCR 盖章版确认最终签署文本，不只看源稿）

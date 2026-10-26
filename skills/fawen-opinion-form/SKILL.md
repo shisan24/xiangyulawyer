@@ -1,6 +1,6 @@
 ---
 name: fawen-opinion-form
-description: 出具【主体】/【主体】法审意见单——套模板、改文字、嵌签名、出PDF。
+description: 出具客户单位法审意见单——套模板、改文字、嵌签名、出PDF。
 version: 1.0.0
 author: xiangyulawyer
 source: https://github.com/shisan24/xiangyulawyer
@@ -10,7 +10,7 @@ source: https://github.com/shisan24/xiangyulawyer
 
 # fawen-opinion-form
 
-**适用场景**：出具【主体】/【主体】法审意见单——套模板、改文字、嵌签名、出PDF。
+**适用场景**：出具客户单位法审意见单——套模板、改文字、嵌签名、出PDF。
 
 ### 1. 合同审查 → 两步走
 **第一步：审查汇报**。快速走一遍（宏观→中观→微观），汇总风险问题清单汇报。标记颜色等级（🔴高风险/🟡中风险/🟢无问题）。

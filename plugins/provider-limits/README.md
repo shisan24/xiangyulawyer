@@ -51,7 +51,7 @@ CommandCode 在凭证池里有两个账户（`auth.json → credential_pool.comm
 - 同一套兜底（`PROVIDER_ENV_FALLBACK`）也接在 `_resolve()` 后面：池内条目被标 auth/耗尽后
   `resolve_runtime_provider` 会直接跳过，退回按变量名直读 .env，OpenRouter 这类行才不会只剩「未解析到 API Key」；
   只补读，不改池状态。新增供应商时在 `PROVIDER_ENV_FALLBACK` 里登记变量名即可。
-- 邮箱做掩码（`【邮箱】`）；**凭据池当前选中的**那个标「运行时正在使用」（判据见下条）——注意池子是
+- 邮箱做掩码（`邮箱`）；**凭据池当前选中的**那个标「运行时正在使用」（判据见下条）——注意池子是
   **限流后自动切换**，该标记不等于"此刻每一次请求都在服务"。
 - ⚠ 「正在使用」的判据必须取**池的选择**（`load_pool()` → `current()`/`select()`），不能用 `_resolve()`：
   桌面后端是 multiplex 进程，`resolve_runtime_provider` 在那里不走凭据池、直接落到 `.env` 主变量，
@@ -103,7 +103,7 @@ PY=[本地路径]
 
 ## 已核验行为（2026-09-17）
 
-- CommandCode / Codex（走代理 【本机端口】）/ DeepSeek / Kimi / OpenRouter 均取到真实数据。
+- CommandCode / Codex（走代理 本地端口）/ DeepSeek / Kimi / OpenRouter 均取到真实数据。
 - 首次运行输出 3 条提醒（DeepSeek 余额耗尽、Kimi 余额偏低、nous 凭据异常），二次运行静默，
   日报正常；`--force` 可重发。
 - 凭据告警做了去噪：供应商本次查询正常、或失败时间超过 48 小时（池子里的历史 429/401）不再提醒。

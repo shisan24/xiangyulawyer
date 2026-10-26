@@ -12,6 +12,7 @@ plus the worker status file.
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import re
@@ -163,8 +164,10 @@ def _scope_recall_stats() -> dict:
         cutoff = (datetime.now(timezone.utc) - timedelta(hours=24)).strftime(
             "%Y-%m-%dT%H:%M:%S"
         )
+        # recorded_at 是定长 ISO-8601 UTC 串（YYYY-MM-DDTHH:MM:SS.ffffffZ），字典序即时间序，
+        # 可以直接比较；外层套 substr() 会让索引失效（实测 2.0 s vs 0.03 s，见 source_recorded_at）。
         out["sources_last_24h"] = cur.execute(
-            "SELECT COUNT(*) FROM source_events WHERE substr(recorded_at, 1, 19) >= ?",
+            "SELECT COUNT(*) FROM source_events WHERE recorded_at >= ?",
             (cutoff,),
         ).fetchone()[0]
 
@@ -201,9 +204,17 @@ def _scope_recall_stats() -> dict:
 
 @router.get("/stats")
 async def stats() -> dict:
+    # 同步 sqlite 读取放进线程池：_scope_recall_stats 会全表扫 1.2 GB 的
+    # scope-recall/memory.sqlite3（实测空载 3.0 s），直接在事件循环线程里跑
+    # 会卡住整个 gateway——2026-10-18 21:21 事件循环探针连续 3 次无响应、
+    # 进程以 exit 75 自杀重启时，主线程堆栈正停在这个调用里。
+    memory, scope_recall = await asyncio.gather(
+        asyncio.to_thread(_memory_stats),
+        asyncio.to_thread(_scope_recall_stats),
+    )
     return {
-        "memory": _memory_stats(),
-        "scope_recall": _scope_recall_stats(),
+        "memory": memory,
+        "scope_recall": scope_recall,
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }
 

@@ -7,14 +7,14 @@ state.db 备份脚本 — 跨机兼容
 import os, shutil, glob
 from datetime import datetime
 
-# 坚果云同步目录解决 expanduser 陷阱：
-# 本机 【本机标识】 但同步目录在 【律师】 下
+# 第三方同步盘同步目录解决 expanduser 陷阱：
+# 本机 本机目录 但同步目录在 承办人 下
 KEEP = 4
 
 def find_sync_dir():
     candidates = [
         r"[本地路径]",
-        os.path.join(os.path.expanduser("~"), "【本机标识】"),
+        os.path.join(os.path.expanduser("~"), "本机目录"),
     ]
     for d in candidates:
         if os.path.isdir(d) and os.path.exists(os.path.join(d, "state.db")):
@@ -23,7 +23,7 @@ def find_sync_dir():
 
 SYNC_DIR = find_sync_dir()
 if not SYNC_DIR:
-    print("ERROR: Cannot find 【本机标识】 directory with state.db")
+    print("ERROR: Cannot find 本机目录 directory with state.db")
     exit(1)
 
 SRC = os.path.join(SYNC_DIR, "state.db")

@@ -1,16 +1,16 @@
 # © 2026 xiangyulawyer · github.com/shisan24/xiangyulawyer · 未经许可不得转载，引用请署名
 """
 每日技能备份脚本
-- 检查 【本机标识】/skills 是否有变化
+- 检查 本机目录/skills 是否有变化
 - 有变化则创建 tar.gz 备份（含机器标记）
 - 保留最近 7 个备份，自动清理旧的
 """
 import os, tarfile, datetime, glob, hashlib, socket, json, re
 
-# Use 【本机标识】 as sync root (not script dir, since script may be symlinked/copied)
-SYNC_DIR = os.path.join(os.path.expanduser("~"), "【本机标识】")
+# Use 本机目录 as sync root (not script dir, since script may be symlinked/copied)
+SYNC_DIR = os.path.join(os.path.expanduser("~"), "本机目录")
 SKILLS_DIR = os.path.join(SYNC_DIR, "skills")
-# Fallback: if 【本机标识】 doesn't exist, use [本地路径]
+# Fallback: if 本机目录 doesn't exist, use [本地路径]
 if not os.path.isdir(SKILLS_DIR):
     SKILLS_DIR = os.path.join(os.path.expanduser("~"), ".hermes", "skills")
 if not os.path.isdir(SYNC_DIR):

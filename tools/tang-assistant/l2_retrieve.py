@@ -15,7 +15,7 @@ import numpy as np
 
 HERMES_HOME = Path.home() / ".hermes"
 STORE_PATH = HERMES_HOME / "memory" / "l2_store.json"
-OLLAMA_URL = "http://【本机端口】/api/embeddings"
+OLLAMA_URL = "http://本地端口/api/embeddings"
 MODEL = "nomic-embed-text"
 
 

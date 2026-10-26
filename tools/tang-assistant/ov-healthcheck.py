@@ -12,7 +12,7 @@ import sys
 import urllib.request
 import urllib.error
 
-OV_BASE = "http://【本机端口】"
+OV_BASE = "http://本地端口"
 TIMEOUT = 10
 
 

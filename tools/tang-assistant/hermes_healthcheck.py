@@ -21,7 +21,7 @@ def check(name, condition, detail=""):
         return False
 
 # 1. 目录
-check("【本机标识】", os.path.isdir(SYNC_DIR))
+check("本机目录", os.path.isdir(SYNC_DIR))
 check(".hermes", os.path.isdir(HERMES_HOME))
 
 # 2. state.db
@@ -72,10 +72,10 @@ if peers:
 else:
     check("标记", False, "no machine markers found")
 
-# 6. 坚果云 (通过同步目录 mtime)
+# 6. 第三方同步盘 (通过同步目录 mtime)
 sync_mtime = datetime.datetime.fromtimestamp(os.path.getmtime(SYNC_DIR))
 sync_age_h = (datetime.datetime.now() - sync_mtime).total_seconds() / 3600
-check("坚果云同步", sync_age_h < 24, f"last sync {sync_age_h:.1f}h ago")
+check("第三方同步盘同步", sync_age_h < 24, f"last sync {sync_age_h:.1f}h ago")
 
 # 7. config
 check("config.yaml", os.path.exists(os.path.join(HERMES_HOME, "config.yaml")))

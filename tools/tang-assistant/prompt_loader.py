@@ -6,7 +6,7 @@ Skills 可引用模板而非内联 prompt。
 
 用法:
     from prompt_loader import load_template
-    prompt = load_template("legal-opinion-header", firm="【律所】", client="【主体】")
+    prompt = load_template("legal-opinion-header", firm="该律所", client="客户单位")
 """
 
 import os, re

@@ -341,7 +341,7 @@ def find_agents_md():
     """Find AGENTS.md in known locations."""
     candidates = [
         Path.home() / "workspace" / "AGENTS.md",
-        Path.home() / ".." / "【律师】" / "【本机标识】" / "AGENTS.md",
+        Path.home() / ".." / "承办人" / "本机目录" / "AGENTS.md",
         Path("[本地路径]"),
         HARNESS_DIR.parent / "workspace" / "AGENTS.md",
     ]
@@ -446,11 +446,11 @@ def append_rule(agents_path, section, rule_text, trigger_event="", date=None):
     with open(agents_path, "w", encoding="utf-8") as f:
         f.write(new_content)
 
-    # Also sync to 【本机标识】 if possible
+    # Also sync to 本机目录 if possible
     sync_path = None
     for candidate in [
         Path("[本地路径]"),
-        Path.home() / ".." / "【律师】" / "【本机标识】" / "AGENTS.md",
+        Path.home() / ".." / "承办人" / "本机目录" / "AGENTS.md",
     ]:
         if candidate.parent.exists():
             sync_path = candidate

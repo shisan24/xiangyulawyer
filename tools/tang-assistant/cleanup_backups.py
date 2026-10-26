@@ -10,7 +10,7 @@ from datetime import datetime
 def find_sync_dir():
     candidates = [
         r"[本地路径]",
-        os.path.join(os.path.expanduser("~"), "【本机标识】"),
+        os.path.join(os.path.expanduser("~"), "本机目录"),
     ]
     for d in candidates:
         if os.path.isdir(d):
@@ -19,7 +19,7 @@ def find_sync_dir():
 
 SYNC_DIR = find_sync_dir()
 if not SYNC_DIR:
-    print("ERROR: Cannot find 【本机标识】")
+    print("ERROR: Cannot find 本机目录")
     exit(1)
 
 backups = sorted(glob.glob(os.path.join(SYNC_DIR, "skills-backup-*.tar.gz")), reverse=True)

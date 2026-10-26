@@ -3,7 +3,7 @@
 
 Reuses the standalone adapter's data functions (case.md discovery, session
 merge log) so the desktop pane has a gateway-native backend and does NOT
-depend on the external 【IP】:8797 adapter process.
+depend on the external 本机地址:8797 adapter process.
 
 Mounted at /api/plugins/lawyer-workbench/ by the gateway plugin loader.
 Read-only for case files; merge actions write only this plugin's own
@@ -34,7 +34,7 @@ ROLES_DIR = Path(os.environ.get("HERMES_HOME", str(Path.home() / "AppData" / "Lo
 
 # 期限台账（律师工作台「案件总览」读取显示）
 # 唯一来源：lawyer-workbench.json 的 deadline_file；读不到配置时回退现任台账。
-# 2026-09-30：配置曾指向 【本机标识】/记忆/案件时限台账.md —— 那是 2026-09-17 已被现任台账承接的旧表
+# 2026-09-30：配置曾指向 本机目录/记忆/案件时限台账.md —— 那是 2026-09-17 已被现任台账承接的旧表
 # （旧表自身表头写明"已停更两个月，仅移入仍有效条目"，且含 2026-07-02／2026-07-22 两条已过期日期）。
 # 代码这里一直读的是现任台账，错的是配置，故以配置为准并回退现任路径，避免两处各读一份。
 _WORKBENCH_CONFIG = (
@@ -183,10 +183,18 @@ async def merge(body: dict) -> dict:
                         "category": target_matter.get("category"),
                     }
                 entries.append(entry)
-            tmp = path.with_suffix(".json.tmp")
+            # 唯一临时名（R15）：固定 .json.tmp 会让两次并发写互相覆盖——
+            # 后写者覆盖先写者的临时文件，再各自 replace，最终台账可能少一条。
+            tmp = path.with_name(f"{path.name}.tmp-{os.getpid()}-{uuid.uuid4().hex[:8]}")
             tmp.write_text(json.dumps(log, ensure_ascii=False, indent=2), encoding="utf-8")
-            tmp.replace(path)
-        except OSError as exc:
+            os.replace(tmp, path)
+            # 写后读回：归并台账是"我把这条线索归到了哪"的唯一记录，写入必须可核对
+            back = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(back, dict) or not isinstance(back.get("entries"), list):
+                return {"ok": False, "error": "归并台账写入后读回异常，本次结果不可信；请重试"}
+            if len(back["entries"]) != len(entries):
+                return {"ok": False, "error": f"归并台账写入后读回不一致（{len(back['entries'])}≠{len(entries)}），请重试"}
+        except (OSError, ValueError) as exc:
             return {"ok": False, "error": f"归并台账写入失败：{exc}"}
         # 归并台账已变化，失效 /workbench 缓存
         _PAYLOAD_CACHE["data"] = None
@@ -268,6 +276,7 @@ from lawyer_deadline_core import (  # noqa: E402
     MILESTONE_STATUS,
     TERMINAL_STATUS,
     bucket as _bucket,
+    clean_due,
     date_quality,
     needs_receipt,
     parse_date as _core_parse_date,
@@ -371,7 +380,10 @@ def _read_deadlines() -> dict:
         rows += 1
         due_raw = cols[2]
         # 日期质量由共享核心判定（date / tentative / invalid），与 lawyer_ops 同源。
+        # due 输出**清洗后的日期**（台账里写作 **2026-10-28** 时，带星号的原文会让面板
+        # 既显示难看又解析不出倒计时）；原文留在 due_raw 里备查。
         due_kind = date_quality(due_raw)
+        due_show = clean_due(due_raw) or due_raw
         if due_kind == "invalid":
             # 真解析问题：**保留该行**并标 invalid（复核 R02：此前在此剔除，导致
             # 同一事项在脚本里被保留、在面板里消失，items 数与台账源行数不闭合）。
@@ -380,7 +392,8 @@ def _read_deadlines() -> dict:
         items.append({
             "case": cols[0],
             "matter": cols[1],
-            "due": due_raw,
+            "due": due_show,
+            "due_raw": due_raw,
             "status": cols[3],
             "note": cols[4] if len(cols) > 4 else "",
             "due_kind": due_kind,

@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 NAME = "xiangyulawyer"
-EMAIL = "【邮箱】"
+EMAIL = "邮箱"
 
 
 def run(cmd, cwd, check=True):

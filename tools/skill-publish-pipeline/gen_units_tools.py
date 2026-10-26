@@ -18,9 +18,11 @@ GROUPS = [
     ("tools/hermes-personal-scripts", H + r"\scripts", [".py", ".bat", ".sh", ".cmd"],
      ["__pycache__", "_orphans", "cron-session-close"]),
     ("tools/tang-assistant", r"[本地路径]", PYMD, ["__pycache__"]),
+    # 注：拆书「每本书的工作目录」（如 zhixing-gongzuo-zhidao/）属书稿衍生，且会话进行中仍在写，
+    # 不进公开库：正文/引文有版权风险、文件仍在变动。新增书目录时在此登记（2026-10-16 登记）。
     ("tools/cangjie-pipeline", r"[本地路径]", PY, ["__pycache__", "raw", "raw_ocr_paddle",
      "raw_clean", "src", "_extracted", "candidates", "pdf", "zip", "out", "_skill_backup",
-     "ai-legal-claude"]),
+     "_garble_ocr", "zhixing-gongzuo-zhidao", "ai-legal-claude"]),
     # 注：[本地路径] 整组已剔除——该组脚本内嵌名单型数据（属于数据本身，
     # 不是可框架化的工具），换谁发布都不该带上。范围排除项统一登记在 gen_publishable.py。
     ("tools/mineru", r"[本地路径]", PYMD, []),

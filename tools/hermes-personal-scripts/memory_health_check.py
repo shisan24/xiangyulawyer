@@ -19,7 +19,7 @@ TARGET_ENTRIES = 8       # 瘦身目标条目数 (per memory-slimming-workflow.m
 
 # === 路径 ===
 local_appdata = os.path.expandvars(r"%LOCALAPPDATA%")
-hermes_sync = None  # 2026-08-03: 取消坚果云同步，无同步目录
+hermes_sync = None  # 2026-08-03: 取消第三方同步盘同步，无同步目录
 mem_dir = os.path.join(local_appdata, "hermes", "memories")
 os.makedirs(mem_dir, exist_ok=True)
 
@@ -152,7 +152,7 @@ try:
     # ═══════════════════════════════════════
     agents_local = os.path.join(os.path.expanduser("~"), ".hermes", "AGENTS.md")
     l1 = {}
-    # 2026-08-03: 取消坚果云同步，无双副本，仅单侧存在性检查
+    # 2026-08-03: 取消第三方同步盘同步，无双副本，仅单侧存在性检查
     l1["agents_local"] = os.path.exists(agents_local)
     l1["agents_sync"] = False
     l1["hash_match"] = "n/a"

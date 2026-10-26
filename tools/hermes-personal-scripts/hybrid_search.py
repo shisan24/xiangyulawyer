@@ -60,7 +60,7 @@ class HybridSearch:
         # Vector
         self.ef = OllamaEmbeddingFunction(
             model_name=OLLAMA_MODEL,
-            url="http://【本机端口】/api/embeddings"
+            url="http://本地端口/api/embeddings"
         )
         self.client = chromadb.PersistentClient(path=CHROMA_PATH)
         self._ensure_collection()

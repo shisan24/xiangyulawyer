@@ -5,11 +5,11 @@ import chromadb
 from chromadb.utils.embedding_functions import OllamaEmbeddingFunction
 from rank_bm25 import BM25Okapi
 
-for t in ['【律所】','【律所】','补充协议','违约金','诉讼时效','尽调','合同解除','违约责任','民法典','公司法','【律师】']:
+for t in ['该律所','该律所','补充协议','违约金','诉讼时效','尽调','合同解除','违约责任','民法典','公司法','承办人']:
     jieba.add_word(t)
 
 path = os.path.expanduser('[本地路径]')
-ef = OllamaEmbeddingFunction(model_name='bge-m3:latest', url='http://【本机端口】/api/embeddings')
+ef = OllamaEmbeddingFunction(model_name='bge-m3:latest', url='http://本地端口/api/embeddings')
 client = chromadb.PersistentClient(path=path)
 
 try: client.delete_collection('legal_knowledge')

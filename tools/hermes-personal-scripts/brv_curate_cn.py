@@ -38,7 +38,7 @@ def curate(text: str, timeout: int = 60) -> dict:
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         # demo mode
-        test = "【律师】是【律所】的律师，负责建设工程合同纠纷案件"
+        test = "承办人是该律所的律师，负责建设工程合同纠纷案件"
         print("原文:", test)
         print("分词:", tokenize(test))
         print("\n--- 测试 curate ---")

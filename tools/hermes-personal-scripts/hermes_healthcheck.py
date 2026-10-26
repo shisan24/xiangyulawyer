@@ -5,5 +5,5 @@ Wrapper: hermes_healthcheck.py --full
 健康检查功能由 scope_recall_health.py 承担。
 """
 import sys
-print("[SKIP] hermes_healthcheck 主脚本不存在（原位于 【本机标识】，2026-08-02 取消同步后删除）")
+print("[SKIP] hermes_healthcheck 主脚本不存在（原位于 本机目录，2026-08-02 取消同步后删除）")
 sys.exit(0)

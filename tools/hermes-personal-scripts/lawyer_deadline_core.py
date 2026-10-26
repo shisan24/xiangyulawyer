@@ -62,8 +62,20 @@ MILESTONE_STATUS = {'已开庭', '已提交', '已缴费', '已续冻', '已解�
 RECEIPT_EXEMPT = ('无须回证', '无需回证', '免回证', '不需回证', '无回证')
 
 _DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+_DATE_FRAG_RE = re.compile(r'\d{4}-\d{2}-\d{2}|\d{1,2}-\d{1,2}')   # 区间/复合表述里的日期片段
+_MD_STRIP = '*`_ \t'
 _TENTATIVE_HINTS = ('约', '待核实', '待核', '待定', '暂定', '月底', '上旬', '中旬', '下旬',
                     '季度', '待送达', '待判决', '待生效', '生效后', '为准', '未定', '待')
+
+
+def clean_due(value) -> str:
+    """剥掉 markdown 包裹与首尾空白。
+
+    台账里日期常被写成 `**2026-10-28**`（实测第 15/16/23 行三条客户单位期限即如此）：
+    不剥的话既解析不出日期（被当成"既非日期也非约期表述"而从清单里消失），
+    显示出来还会带一串星号。
+    """
+    return str(value or '').strip().strip(_MD_STRIP).strip()
 
 
 def status_class(status) -> str:
@@ -78,7 +90,7 @@ def status_class(status) -> str:
 
 
 def date_quality(due) -> str:
-    d = str(due or '').strip()
+    d = clean_due(due)
     if not d:
         return 'tentative'
     if _DATE_RE.match(d):
@@ -89,11 +101,15 @@ def date_quality(due) -> str:
             return 'invalid'
     if any(h in d for h in _TENTATIVE_HINTS):
         return 'tentative'
+    # 区间/复合日期（如「2026-10-19 起至 11-18」）：不是解析错误，只是给不出单点倒计时，
+    # 归 tentative 让人工判断——此前只有"含约/待"才放行，这类被当成 bad 数据报出来。
+    if _DATE_FRAG_RE.search(d):
+        return 'tentative'
     return 'invalid'
 
 
 def parse_date(due):
-    d = str(due or '').strip()
+    d = clean_due(due)
     if not _DATE_RE.match(d):
         return None
     try:

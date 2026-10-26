@@ -1,6 +1,6 @@
 # © 2026 xiangyulawyer · github.com/shisan24/xiangyulawyer · 未经许可不得转载，引用请署名
 """知识库同步 — no_agent cron 脚本
-扫描案件目录新增文件 → 同步到 Obsidian 【本机标识】/"""
+扫描案件目录新增文件 → 同步到 Obsidian 本机目录/"""
 import os
 import sys
 import shutil

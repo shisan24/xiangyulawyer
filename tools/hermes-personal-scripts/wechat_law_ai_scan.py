@@ -96,7 +96,7 @@ def response_blocked(response):
 
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-      "(KHTML, like Gecko) Chrome/【IP】 Safari/537.36")
+      "(KHTML, like Gecko) Chrome/本机地址 Safari/537.36")
 
 OUT_DIR = r"[本地路径]"
 CACHE_DIR = os.path.join(OUT_DIR, "候选")

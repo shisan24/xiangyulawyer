@@ -4,7 +4,7 @@
 
 v1 已确认的现场事实（cron 环境，14:40:41 采样）：
 - 继承 cron 环境调用 venv 里的 scope-recall.exe → rc=1、stdout=0、stderr 2289 字节 Python traceback；
-- 换成 9 个变量的最小环境（SYSTEMROOT/PATH/TEMP/TMP/LOCALAPPDATA/APPDATA/USERPROFILE/HERMES_HOME/COMSPEC）→ 正常输出 【金额】 字节；
+- 换成 9 个变量的最小环境（SYSTEMROOT/PATH/TEMP/TMP/LOCALAPPDATA/APPDATA/USERPROFILE/HERMES_HOME/COMSPEC）→ 正常输出 金额 字节；
 - 桌面 shell 里各种组合都正常 → 故障只在 cron 那套环境里出现。
 
 本脚本在 cron 里做二分查找：以最小环境为能跑的基线，把其余变量对半分批塞回，

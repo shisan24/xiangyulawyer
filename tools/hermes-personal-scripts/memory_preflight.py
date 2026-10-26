@@ -137,6 +137,10 @@ def sha(s: str) -> str:
 # 增量阈值与绝对下限同时满足才唤醒，避免小抖动吃掉当日唤醒预算（MAX_WAKES_PER_DAY=4）。
 WORK_FAILED_GROWTH_MIN = 25
 WORK_FAILED_FLOOR = 50
+# 新增条目闸门（v2.4，2026-10-24）：MEMORY 瘦身后长期低于容量阈值，但新环境事实仍在写入；
+# 只看容量会让新条目永不进分流（用户明确"不能总等我手动"）。基准＝上次评估回执里的
+# metrics.memory_md.chars_raw（瘦身任务写回执时必须带），净增长达门槛才唤醒，避免小抖动。
+MEMORY_GROWTH_MIN = 200
 
 
 def failed_work_count():
@@ -404,6 +408,17 @@ def main() -> int:
     info["health"] = {"status": health, "verified": health_verified, "detail": detail}
 
     problems = list(capacity_problems)
+    # v2.4（2026-10-24）：新增条目同样触发分流——MEMORY 瘦身后长期低于容量阈值，
+    # 只看容量会让新事实永不进分流。基准取上次评估回执的 metrics.memory_md.chars_raw
+    # （瘦身任务写回执时必须带该字段），净增长达门槛才唤醒，避免小抖动吃掉每日预算。
+    _prev_mem = (((load_json(RECEIPT).get("metrics") or {}).get("memory_md") or {})
+                 .get("chars_raw"))
+    _cur_mem = (info.get("MEMORY.md") or {}).get("chars_raw")
+    if isinstance(_prev_mem, int) and isinstance(_cur_mem, int):
+        _mem_grew = _cur_mem - _prev_mem
+        if _mem_grew >= MEMORY_GROWTH_MIN:
+            problems.append(f"MEMORY.md 自上次评估新增 {_mem_grew} 字符"
+                            f"（{_prev_mem}→{_cur_mem}），需判去向")
     health_note = None
     health_gaps = ""
     health_gaps_actionable = ""

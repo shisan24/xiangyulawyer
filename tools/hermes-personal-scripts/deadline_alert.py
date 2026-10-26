@@ -5,7 +5,7 @@ import subprocess
 import sys
 import os
 
-# 2026-08-03: 【本机标识】 已删，scanner 在本目录
+# 2026-08-03: 本机目录 已删，scanner 在本目录
 SCANNER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deadline_scanner.py")
 
 def run():

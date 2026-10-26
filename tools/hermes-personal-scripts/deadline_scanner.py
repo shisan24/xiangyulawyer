@@ -3,11 +3,20 @@
 案件时限扫描器
 每周一扫描 案件时限台账.md，标记 ≤30 天的紧急/注意项目
 """
-import os, re, datetime, json
+import os, re, datetime, json, sys
 from pathlib import Path
 
+# 状态集合唯一真源：scripts/lawyer_deadline_core.py（与 lawyer_ops、工作台面板共用）。
+# 2026-10-24：本脚本原先硬取前三列、完全不看状态列，已办结与已开庭的条目仍会被报成紧急事项。
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+try:
+    from lawyer_deadline_core import TERMINAL_STATUS, MILESTONE_STATUS
+except ImportError:  # 兜底：与 core 同名集合保持一致，两处都必须改时以 core 为准
+    TERMINAL_STATUS = {'已完成', '已办结', '已处理', '已取消', '取消', '已撤销', '办结', '完成'}
+    MILESTONE_STATUS = {'已开庭', '已提交', '已缴费', '已续冻', '已解除'}
+
 # 台账唯一来源：lawyer-workbench.json 的 deadline_file（2026-09-30 更正：此前写死旧表
-# 【本机标识】/记忆/案件时限台账.md —— 该表 2026-09-17 已被 D 盘现任台账承接并停更）。
+# 本机目录/记忆/案件时限台账.md —— 该表 2026-09-17 已被 D 盘现任台账承接并停更）。
 _HOME = Path(os.environ.get("HERMES_HOME") or (Path.home() / "AppData" / "Local" / "hermes"))
 _FALLBACK = Path(r"[本地路径]")
 
@@ -43,27 +52,55 @@ def scan():
 
     today = datetime.date.today()
     alerts, issues, tentative = [], [], []
+    completed, milestones = 0, []
     rows, header_seen = 0, False
 
-    # 解析表格行: | 案件 | 事项 | 截止日 | 剩余天数 | 状态 |
+    header = None
+    # 按表头名称映射列，不硬取列位：真实台账是「案件｜事项｜期限｜状态｜备注」，
+    # 状态在第 4 列；此前按 parts[4] 取到的是备注（2026-10-24 Codex 复核指出）。
     for num, line in enumerate(content.split("\n"), 1):
-        if "|" not in line or line.strip().startswith("|-"):
+        if "|" not in line:
             continue
-        parts = [p.strip() for p in line.split("|") if p.strip()]
-        if not parts:
+        raw = line.strip()
+        if re.fullmatch(r"\|?[\s:|\-]+\|?", raw):      # 表头分隔行
             continue
-        if parts[0] in ("案件", "案件名称"):
-            header_seen = True
+        body = raw.strip()
+        if body.startswith("|"):
+            body = body[1:]
+        if body.endswith("|"):
+            body = body[:-1]
+        cells = [c.strip() for c in re.split(r"(?<!\\)\|", body)]
+        if not any(cells):
             continue
-        if len(parts) < 3:
-            issues.append(f"第{num}行列数不足，未纳入判断")
+        if header is None:
+            if any(k in cells for k in ("案件", "案件名称")):
+                header = cells
+                header_seen = True
+            continue
+        if len(cells) != len(header):
+            issues.append(f"第{num}行列数与表头不一致（{len(cells)}/{len(header)}），未纳入判断")
+            continue
+        row = dict(zip(header, cells))
+        case = row.get("案件") or row.get("案件名称") or ""
+        task = row.get("事项") or ""
+        deadline = row.get("期限") or row.get("截止日") or row.get("截止日期") or ""
+        status = row.get("状态") or ""
+        if not case and not task:
             continue
         rows += 1
 
-        case, task, deadline = parts[0], parts[1], parts[2]
+        if status in TERMINAL_STATUS:
+            completed += 1
+            continue
+        if status in MILESTONE_STATUS:
+            milestones.append(f"[{case}] {task}：{status}（事件已发生，不等于事项办结）")
+            continue
 
         try:
-            d = datetime.datetime.strptime(deadline, "%Y-%m-%d").date()
+            # 台账里期限常带 markdown 标记（**2026-10-28**、`2026-11-18`），先按 core._MD_STRIP
+            # 同口径清掉再加解析；否则真实台账会被整片报成「既非日期也非约期」。
+            clean = re.sub(r"[*`_]", "", deadline).strip()
+            d = datetime.datetime.strptime(clean, "%Y-%m-%d").date()
         except (ValueError, TypeError):
             if _is_tentative(deadline):
                 # 约期/待核实是台账的正常表述，单独归类，不当作解析错误
@@ -87,6 +124,11 @@ def scan():
         issues.append("台账无数据行，尚不能据此确认案件期限已登记完整")
 
     out = ["📅 案件时限提醒:"] + alerts if alerts else ["✅ 无 ≤30天 的紧急事项"]
+    if milestones:
+        out.append(f"另有 {len(milestones)} 条为已发生事件（需确认后续动作，不按期限告警）：")
+        out.extend("- " + x for x in milestones)
+    if completed:
+        out.append(f"已办结 {completed} 条，未纳入期限判断。")
     if tentative:
         out.append(f"另有 {len(tentative)} 条为约期或待核实，未纳入期限判断（逐条见台账）。")
     if issues:

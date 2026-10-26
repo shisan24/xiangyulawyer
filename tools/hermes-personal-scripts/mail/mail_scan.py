@@ -358,6 +358,71 @@ def _receipt_line(item) -> "str | None":
     return '；'.join(lines)
 
 
+REGISTERED_STATES = {"checks_passed", "qa_passed", "delivered", "completed", "declined"}
+
+
+def _receipt_state(folder_path):
+    """读某封邮件附件目录的处理回执，只认与当前文件匹配的终态。
+
+    原先只要有回执、state/status 是终态就认，旧 completed 未绑定当前版本也算完成，
+    版本变化后仍会把附件移出待处理（2026-10-24 复核 C14）。改为走 inspect_receipt：
+    只有 current_version_matched 才认；历史未绑定与版本变化一律标 stale，留在待处理。
+    """
+    p = Path(folder_path) / "_处理回执.json"
+    if not p.is_file():
+        return None
+    try:
+        from lawyer_quality_state import inspect_receipt
+        rec = inspect_receipt(Path(folder_path))
+    except Exception:
+        return None
+    vs = rec.get("version_state")
+    st = rec.get("status")
+    if vs == "no_receipt":
+        return None
+    # declined_verified 也认：明确不办理不需要修订三件套，
+    # 但必须有对象与理由（复核 2 指出的误挡）。
+    if vs in ("current_version_matched", "declined_verified") and st in REGISTERED_STATES:
+        return st
+    return "stale:" + str(vs)
+
+
+def commit_per_item(entry):
+    """逐封登记：只把已有终态回执的邮件计入送达，其余留待送达。
+
+    幂等：同一封重复运行不会重复登记；只保留未登记项，位点推进到未登记项之前。
+    """
+    delivered = int(entry.get("last_delivered_uid", 0) or 0)
+    pending = [x for x in (entry.get("pending") or []) if int(x.get("uid", 0) or 0) > delivered]
+    registered, remaining = [], []
+    for item in pending:
+        # 一封邮件可能带多个附件、分属不同事项目录。此前只取 dirs[0]，首目录有终态回执
+        # 就把整封记为已送达，其余附件未处理也不会再提醒（2026-10-24 复核 C07）。
+        dirs = list(dict.fromkeys(Path(p).parent for p in (item.get("saved_attachments") or []) if p))
+        states = [_receipt_state(d) for d in dirs]
+        if not dirs:
+            state = None
+        elif all(s in REGISTERED_STATES for s in states):
+            state = states[0] if len(set(states)) == 1 else "completed"
+        else:
+            pend = [d.name for d, s in zip(dirs, states) if s not in REGISTERED_STATES]
+            state = "partial:" + ",".join(pend)
+        row = {"uid": item.get("uid"), "state": state or "no_receipt",
+               "folders": [d.name for d in dirs],
+               "folder_states": [s or "no_receipt" for s in states]}
+        (registered if state in REGISTERED_STATES else remaining).append(row)
+    keep = {r["uid"] for r in remaining}
+    entry["pending"] = [x for x in pending if x.get("uid") in keep]
+    if remaining:
+        new_delivered = min(r["uid"] for r in remaining) - 1
+        entry["last_delivered_uid"] = max(delivered, new_delivered)
+    else:
+        entry["last_delivered_uid"] = int(entry.get("last_uid", delivered) or delivered)
+    entry["last_delivered_at"] = datetime.now(CN_TZ).isoformat(timespec="seconds")
+    return {"registered": registered, "remaining": remaining,
+            "delivered_uid": entry["last_delivered_uid"]}
+
+
 def render_md(result: dict) -> str:
     items = result["items"]
     prev = result.get("prev_pending") or []
@@ -430,6 +495,8 @@ def main():
     ap.add_argument("--attachments-dir", default=CFG.get("attachments_dir", ""))
     ap.add_argument("--commit-delivered", action="store_true",
                     help="登记本轮简报已送达（推进送达位点并清空待送达）")
+    ap.add_argument("--commit-mode", default="all", choices=["all", "per-item"],
+                    help="all=整批推进（旧行为，默认）；per-item=按附件目录回执逐封登记，未定稿的留在待送达")
     ap.add_argument("--clear-deferred", action="store_true", help="清除超限未展开警示")
     ap.add_argument("--status", action="store_true", help="仅显示本地状态（不连邮箱）")
     args = ap.parse_args()
@@ -459,6 +526,16 @@ def main():
         e = st.setdefault(args.folder, {})
         if "last_delivered_uid" not in e:
             e["last_delivered_uid"] = int(e.get("last_uid", 0))
+        if args.commit_mode == "per-item":
+            res = commit_per_item(e)
+            save_state(st)
+            print("OK 逐封登记：已登记 %d 封（%s），留在待送达 %d 封（%s），送达位点=%s"
+                  % (len(res["registered"]),
+                     ", ".join("UID %s:%s" % (r["uid"], r["state"]) for r in res["registered"]) or "-",
+                     len(res["remaining"]),
+                     ", ".join("UID %s:%s" % (r["uid"], r["state"]) for r in res["remaining"]) or "-",
+                     res["delivered_uid"]))
+            return
         e["last_delivered_uid"] = int(e.get("last_uid", 0))
         cleared = len(e.get("pending", []) or [])
         e["pending"] = []

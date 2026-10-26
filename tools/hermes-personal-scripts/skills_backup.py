@@ -7,7 +7,7 @@
 """
 import os, tarfile, datetime, glob, hashlib, socket, json, re
 
-# 2026-07-31: 【本机标识】 已废弃删除，技能真源迁移到 AppData\Local\hermes\skills
+# 2026-07-31: 本机目录 已废弃删除，技能真源迁移到 AppData\Local\hermes\skills
 HERMES_HOME = os.environ.get('HERMES_HOME') or os.path.join(os.path.expanduser("~"), "AppData", "Local", "hermes")
 SKILLS_DIR = os.path.join(HERMES_HOME, "skills")
 SYNC_DIR = os.path.join('[本地路径]', '技能日备份')

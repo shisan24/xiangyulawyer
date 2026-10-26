@@ -4,7 +4,7 @@
 
 背景：worker 每次启动会写一个 `runtime-config-worker-<8位>.json`，并声明
 `cleanup_config: True` 由子进程退出时自删。worker 异常退出时删不掉，于是累积：
-2026-09-30 实测 【金额】 个 / 46.6 MiB，且每小时新增约 180–250 个。
+2026-09-30 实测 金额 个 / 46.6 MiB，且每小时新增约 180–250 个。
 
 已核实（做清理前的前置事实）：
 - 文件内容**不含凭据值**，只有环境变量名（如 `credential_env: DEEPSEEK_API_KEY`）；
